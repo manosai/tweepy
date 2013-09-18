@@ -37,9 +37,9 @@ for i,batch in enumerate(batch(unknowns)):
 	tweets = [b['tweet'] for b in batch]
 	#grab the next gold standard tweet
 	control = knowns[i] 
-	#TODO choose a random position for the control
+	#choose a random position for the control
 	random_loc = random.randint(0, 9)
-	#TODO construct a list of fields which will fill in the headers defined
+	#construct a list of fields which will fill in the headers defined
 	tweets.insert(random_loc, control['tweet'])
 	tweets.insert(10, random_loc)
 	tweets.insert(11, control['label'])
