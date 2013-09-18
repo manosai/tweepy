@@ -11,16 +11,17 @@ def escape(t): return (t.replace("&", "&amp;").replace("<", "&lt;").replace(">",
 #Compile dictionary {tweet : {number of votes for each label}}
 def get_tweet_data_from_csv(csv_path):
 	tweet_data = dict()
-	for hit in csv.DictReader(open(csv_path)):
+	for hit in csv.DictReader(open(csv_path, "rU")):
 		for i in range(0,10): 
 			tweetId = '%s-%d'%(hit['HITId'],i)
 			#TODO if your tweet labels, in your csv file are not the strings below, you will have to edit this function
 			if tweetId not in tweet_data : tweet_data[tweetId] = {
-			'Strongly positive' : 0, 
-			'Positive' : 0, 
-			'Negative' : 0, 
-			'Neutral' : 0 , 
-			'Strongly negative' : 0, 
+			'Choice1' : 0, 
+			'Choice2' : 0, 
+			'Choice3' : 0, 
+			'Choice4' : 0 , 
+			'Choice5' : 0, 
+			'Choice6' : 0,
 			'text' : escape(hit['Input.tweet%d'%i])
 			}
 			label = hit['Answer.Q%d'%i]
@@ -44,11 +45,11 @@ print ''
 print '\tsentiment_data = ['
 
 print "['Sentiment', 'Strongly Negative', 'Negative', 'Neutral', 'Positive', 'Strongly Positive'],"
-sng = sum([d['strongly negative'] for d in tweet_data])
-ng = sum([d['negative'] for d in tweet_data])
-nu = sum([d['neutral'] for d in tweet_data])
-ps = sum([d['positive'] for d in tweet_data])
-sps = sum([d['strongly positive'] for d in tweet_data])
+sng = sum([d['Choice1'] for d in tweet_data])
+ng = sum([d['Choice2'] for d in tweet_data])
+nu = sum([d['Choice3'] for d in tweet_data])
+ps = sum([d['Choice4'] for d in tweet_data])
+sps = sum([d['Choice5'] for d in tweet_data])
 print "['Count', %d, %d, %d, %d, %d],"%(sng, ng, nu, ps, sps)
 
 print "];"
@@ -58,11 +59,11 @@ print '\tvar tweets = {'
 scored_tweets = {'strongly_positive' : [], 'positive' : [], 'negative' : [], 'neutral' : [], 'strongly_negative' : []}
 
 for tweet in tweet_data:
-	sng = tweet['strongly negative']
-	ng = tweet['negative']
-	nu = tweet['neutral']
-	ps = tweet['positive']
-	sps = tweet['strongly positive']
+	sng = tweet['Choice1']
+	ng = tweet['Choice2']
+	nu = tweet['Choice3']
+	ps = tweet['Choice4']
+	sps = tweet['Choice5']
 	total = sng + ng + nu + ps + sps
 	raw = 0*sng + 25*ng + 50*nu + 75*ps + 100*sps
 	score = float(raw)/total
