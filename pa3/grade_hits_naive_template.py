@@ -22,32 +22,38 @@ csvwriter.writerow(headers)
 
 #I think most of you (I know this is true for myself) annotated the gold standard tweets in the first assignment using a three-point scale (positive, neutral, negative) but then asked Turkers to use a five-point scale (strongly positive, positive, neutral, negative, strongly negative). That is okay, we will map your labels to a list of acceptable answers. So if you called a tweet 'positive', you might accept a turker's response if they say either 'positive' or 'strongly positive'. You can also be very lenient and accept +/- one degree in either direction. That is your call.
 gold_labels = {
-		'YOUR POSITIVE LABEL' : ['strongly positive', 'positive'], 
-		'YOUR NEUTRAL LABEL' : ['neutral'], 
-		'YOUR NEGATIVE LABEL' : ['negative', 'strongly negative']
+		'positive' : ['strongly positive', 'positive'], 
+		'neutral' : ['neutral'], 
+		'negative' : ['negative', 'strongly negative']
 }
 
 mturk_labels = {
-		'YOUR STRONGLY POSITIVE LABEL' : 'strongly positive', 
-		'YOUR POSITIVE LABEL' : 'positive', 
-		'YOUR NEUTRAL LABEL' : 'neutral', 
-		'YOUR NEGATIVE LABEL' : 'negative',
-		'YOUR STRONGLY NEGATIVE LABEL' : 'strongly negative',
-		'YOUR NOT RELEVANT LABEL' : 'NA',
+		'Choice5' : 'strongly positive', 
+		'Choice4' : 'positive', 
+		'Choice3' : 'neutral', 
+		'Choice2' : 'negative',
+		'Choice1' : 'strongly negative',
+		'Choice6' : 'NA',
 		'' : 'NO ANSWER GIVEN' #your turker was a lazy $%&*!. Blank answers will get treated as wrong.
 }
 
 #Grade each HIT
 #Remember, here 'hit' is a dictionary data structure corresponding to one row of your input CSV. It maps the CSV headers to the corresponding values for each row.
 for hit in hit_data:
-	correct_control_answer = #TODO get the correct answer for the control from this row of the CSV 
-	turker_control_answer = #TODO get the Turker's answer for the control tweet 
+	# get the correct answer for the control from this row of the CSV 
+	correct_control_answer = hit['Input.label']
+	# get the Turker's answer for the control tweet 
+	index = hit['Input.control']
+	key = 'Answer.Q' + str(index)
+	turker_control_answer = hit[key]
 	if mturk_labels[turker_control_answer] in gold_labels[correct_control_answer]:
 		print 'Turker answered %s. Expected %s. Approving.' %(turker_control_answer, correct_control_answer)
-		#TODO approve the worker by marking the appropriate column in the CSV with an 'X'
+		# approve the worker by marking the appropriate column in the CSV with an 'X'
+		hit['Approve'] = 'X'
 	else : 
 		print 'Turker answered %s. Expected %s. Rejecting.' %(turker_control_answer, correct_control_answer)
-		#TODO reject the worker by marking the appropriate column in the CSV with an 'X'
+		# reject the worker by marking the appropriate column in the CSV with an 'X'
+		hit['Reject'] = 'X'
 	csvwriter.writerow([hit[column] for column in headers])
 
 
