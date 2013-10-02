@@ -18,21 +18,21 @@ csvwriter = csv.writer(open('hits_graded_moresmarter.csv','w'), delimiter=',', q
 headers = hit_data[0].keys()
 csvwriter.writerow(headers)
 
-#TODO: This is the same as in grade_hits_naive.py. I know code reuse is bad, but I like having these as two separate scripts so that it is easier for you to see what is happening. So, I am going to make you retype all of these. Sincere apologies.
+# This is the same as in grade_hits_naive.py. I know code reuse is bad, but I like having these as two separate scripts so that it is easier for you to see what is happening. So, I am going to make you retype all of these. Sincere apologies.
 
 gold_labels = {
-		'YOUR POSITIVE LABEL' : ['strongly positive', 'positive'], 
-		'YOUR NEUTRAL LABEL' : ['neutral'], 
-		'YOUR NEGATIVE LABEL' : ['negative', 'strongly negative']
+		'positive' : ['strongly positive', 'positive'], 
+		'neutral' : ['neutral'], 
+		'negative' : ['negative', 'strongly negative']
 }
 
 mturk_labels = {
-		'YOUR STRONGLY POSITIVE LABEL' : 'strongly positive', 
-		'YOUR POSITIVE LABEL' : 'positive', 
-		'YOUR NEUTRAL LABEL' : 'neutral', 
-		'YOUR NEGATIVE LABEL' : 'negative',
-		'YOUR STRONGLY NEGATIVE LABEL' : 'strongly negative',
-		'YOUR NOT RELEVANT LABEL' : 'NA',
+		'Choice5' : 'strongly positive', 
+		'Choice4' : 'positive', 
+		'Choice3' : 'neutral', 
+		'Choice2' : 'negative',
+		'Choice1' : 'strongly negative',
+		'Choice6' : 'NA',
 		'' : 'NO ANSWER GIVEN' 
 }
 
@@ -56,25 +56,40 @@ for hit in hit_data:
 	worker = hit['WorkerId']
 	if worker not in worker_accuracies : worker_accuracies[worker] = {'correct' : 0.0, 'total' : 0.0, 'status' : 'PREAPPROVE'}	
 
-	correct_control_answer = #TODO get the correct answer for the control from this row of the CSV 
-	turker_control_answer = #TODO get the Turker's answer for the control tweet 
+	#get the correct answer for the control from this row of the CSV 
+	correct_control_answer = hit['Input.label']
+
+	#get the Turker's answer for the control tweet 
+	index = hit['Input.control']
+	key = 'Answer.Q' + str(index)
+	turker_control_answer = hit[key]
 
 	turker_correct = (mturk_labels[turker_control_answer] in gold_labels[correct_control_answer])
 	
-	#TODO Update the value at 'total' in worker_accuracies[worker] 
-	#TODO Update the value at 'correct' in worker_accuracies[worker] based on the new information contained in this tweet
+	#Update the value at 'total' in worker_accuracies[worker] 
+	worker_accuracies[worker]['total'] += 1.0
+
+	#Update the value at 'correct' in worker_accuracies[worker] based on the new information contained in this tweet
+	if turker_correct: 
+		worker_accuracies[worker]['correct'] += 1.0 
 
 	#Update the worker's status based on the updated accuracies
 
 	#Check if the worker has used up all his free hits. If yes, kick him out of preapproval status. 
-	if (#TODO logic to see if free hits have been used up):
+	#logic to see if free hits have been used up):
+	if (worker_accuracies[worker]['total'] > FREE_HITS):
 		worker_accuracies[worker]['status'] = 'PENDING' 
 	if worker_accuracies[worker]['status'] == 'PENDING':
 	#Check the worker's cumulative accuracy, and see if it requires a status update 
 	#(and by that I mean facebook status update. "Hey guys. A2C1Z52F4B0CG1 just hit 60% accuracy!" These are the kinds of things I post...)
-		acc = #TODO calculate accuracy of worker
-		if acc < REJECT_THRESHOLD : #TODO update status
-		elif acc > APPROVE_THRESHOLD : #TODO update status
+		# calculate accuracy of worker
+		acc = worker_accuracies[worker]['correct'] / worker_accuracies[worker]['total']
+		#update status
+		if acc < REJECT_THRESHOLD : 
+			worker_accuracies[worker]['status'] = 'BLOCKED'
+		#update status
+		elif acc > APPROVE_THRESHOLD :
+			worker_accuracies[worker]['status'] = 'TRUSTED'
 
 	#Finally, approve or reject based on the worker's current status
 	status = worker_accuracies[worker]['status']
@@ -89,7 +104,16 @@ for hit in hit_data:
 		hit['Approve'] = 'X'
 	else : #status is PENDING
 		print 'Turker %s pending at %.02f accuracy.'%(worker, acc)
-		#TODO approve/reject based on the Turker's answer to this control (this is equivalent to the logic in grade_hits_naive.py
+		#approve/reject based on the Turker's answer to this control (this is equivalent to the logic in grade_hits_naive.py
+		if mturk_labels[turker_control_answer] in gold_labels[correct_control_answer]:
+        	print 'Turker answered %s. Expected %s. Approving.' %(turker_control_answer, correct_control_answer)
+        	# approve the worker by marking the appropriate column in the CSV with an 'X'
+        	hit['Approve'] = 'X'
+    	else :
+        	print 'Turker answered %s. Expected %s. Rejecting.' %(turker_control_answer, correct_control_answer)
+        	# reject the worker by marking the appropriate column in the CSV with an 'X'
+        	hit['Reject'] = 'X'
+
 
 	csvwriter.writerow([hit[column] for column in headers])
 

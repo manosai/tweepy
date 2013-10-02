@@ -18,7 +18,7 @@ csvwriter = csv.writer(open('hits_graded_naive.csv','w'), delimiter=',', quotech
 headers = hit_data[0].keys()
 csvwriter.writerow(headers)
 
-#TODO: You may have used slightly different labelings when you annotated the gold standard tweets and when you recorded the Turkers' answers. You will need to map all the answers into a common notation so you can compare. For example, if you used 0=positive, 1=negative, 2=neutral in the HIT, fill that in here. If you used the same labeling in both cases, then these data structures will be unnecessary. That's okay, just fill them in anyway.
+#You may have used slightly different labelings when you annotated the gold standard tweets and when you recorded the Turkers' answers. You will need to map all the answers into a common notation so you can compare. For example, if you used 0=positive, 1=negative, 2=neutral in the HIT, fill that in here. If you used the same labeling in both cases, then these data structures will be unnecessary. That's okay, just fill them in anyway.
 
 #I think most of you (I know this is true for myself) annotated the gold standard tweets in the first assignment using a three-point scale (positive, neutral, negative) but then asked Turkers to use a five-point scale (strongly positive, positive, neutral, negative, strongly negative). That is okay, we will map your labels to a list of acceptable answers. So if you called a tweet 'positive', you might accept a turker's response if they say either 'positive' or 'strongly positive'. You can also be very lenient and accept +/- one degree in either direction. That is your call.
 gold_labels = {
@@ -55,5 +55,4 @@ for hit in hit_data:
 		# reject the worker by marking the appropriate column in the CSV with an 'X'
 		hit['Reject'] = 'X'
 	csvwriter.writerow([hit[column] for column in headers])
-
 
